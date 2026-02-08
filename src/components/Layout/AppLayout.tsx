@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import {
   AppShell,
   Group,
@@ -44,6 +45,9 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useMantineTheme();
+  const isDesktop = useMediaQuery('(min-width: 48em)');
+  const [mobileOpened, { toggle: toggleMobile, close: closeMobile }] =
+    useDisclosure(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const navItems: NavItem[] = [
@@ -63,6 +67,11 @@ export default function AppLayout({ children }: AppLayoutProps) {
     navigate('/login');
   };
 
+  const handleNavClick = (link: string) => {
+    navigate(link);
+    closeMobile();
+  };
+
   const NavItemComponent = ({ icon: Icon, label, link }: NavItem) => {
     const active = isActive(link);
 
@@ -77,7 +86,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
               <IconChevronRight size={16} />
             ) : undefined
           }
-          onClick={() => navigate(link)}
+          onClick={() => handleNavClick(link)}
           active={active}
           className={classes.navLink}
           classNames={{
@@ -111,20 +120,43 @@ export default function AppLayout({ children }: AppLayoutProps) {
     );
   };
 
+  const burgerOpened = isDesktop ? !sidebarCollapsed : mobileOpened;
+  const handleBurgerClick = () => {
+    if (isDesktop) {
+      setSidebarCollapsed((v) => !v);
+    } else {
+      toggleMobile();
+    }
+  };
+
   return (
-    <AppShell padding="0" layout="alt">
+    <AppShell
+      padding="0"
+      layout="alt"
+      header={{ height: { base: 56, sm: 60 } }}
+      navbar={{
+        width: { base: 280, sm: 260, md: 280 },
+        breakpoint: 'sm',
+        collapsed: { mobile: !mobileOpened, desktop: sidebarCollapsed },
+      }}
+      transitionDuration={300}
+      transitionTimingFunction="ease"
+    >
       {/* Header */}
       <AppShell.Header className={classes.header}>
-        <Group justify="space-between" h="100%" px="md">
-          {/* Left side: Hamburger & Logo */}
-          <Group gap={sidebarCollapsed ? 10 : 8}>
-            <Burger
-              opened={!sidebarCollapsed}
-              onClick={() => setSidebarCollapsed((v) => !v)}
-              aria-label="Toggle navigation"
-            />
+        <Group justify="space-between" h="100%" px={{ base: 'sm', sm: 'md' }} wrap="nowrap">
+          {/* Left side: Hamburger (always visible) & Logo */}
+          <Group gap={{ base: 'xs', sm: 'md' }} wrap="nowrap" style={{ flexShrink: 0 }}>
+            <Box className={classes.burgerWrapper}>
+              <Burger
+                opened={burgerOpened}
+                onClick={handleBurgerClick}
+                size="sm"
+                aria-label="Toggle navigation"
+              />
+            </Box>
             <Box>
-              <Text fw={700} size="lg" c="blue">
+              <Text fw={700} size={{ base: 'md', sm: 'lg' }} c="blue">
                 FinanceSystem
               </Text>
             </Box>
@@ -277,7 +309,6 @@ export default function AppLayout({ children }: AppLayoutProps) {
         </Stack>
       </AppShell.Navbar>
 
-      {/* Mobile drawer removed (rollback) */}
       {/* Main Content */}
       <AppShell.Main
         className={classes.main}
@@ -287,12 +318,12 @@ export default function AppLayout({ children }: AppLayoutProps) {
           margin: 0,
         }}
       >
-        <div style={{ padding: '24px', marginTop: '3rem' }}>{children}</div>
+        <div className={classes.mainContent}>{children}</div>
       </AppShell.Main>
 
       {/* Footer */}
       <AppShell.Footer className={classes.footer}>
-        <Group justify="space-between" h="100%" px="md">
+        <Group justify="space-between" h="100%" px={{ base: 'sm', sm: 'md' }}>
           <Text size="sm" c="dimmed">
             &copy; 2025 FinanceSystem. All rights reserved.
           </Text>

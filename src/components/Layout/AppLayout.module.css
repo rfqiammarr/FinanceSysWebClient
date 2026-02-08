@@ -4,16 +4,28 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-.hamburger {
-  transition: all 200ms ease;
-
-  &:hover {
-    background-color: #f1f3f5;
-  }
+/* Keep hamburger always visible on desktop and mobile */
+.burgerWrapper {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  min-width: 36px;
 }
 
 .main {
   /* keep main background handling in layout JS or previous styles */
+}
+
+.mainContent {
+  padding: 16px 24px;
+  padding-top: calc(var(--app-shell-header-height, 60px) + 16px);
+}
+
+@media (min-width: 48em) {
+  .mainContent {
+    padding: 24px;
+    padding-top: calc(var(--app-shell-header-height, 60px) + 24px);
+  }
 }
 
 .headerIcon {
@@ -79,16 +91,4 @@
   display: none;
 }
 
-@media (max-width: 640px) {
-  .navbar {
-    position: fixed;
-    left: 0;
-    top: 70px;
-    height: calc(100vh - 70px);
-    z-index: 99;
-  }
-
-  .main {
-    padding: 16px;
-  }
-}
+/* Navbar visibility & mobile drawer handled by AppShell (breakpoint + collapsed.mobile) */
